@@ -65,7 +65,7 @@ Elasticsearch 5.0 以降に対応しています。
 
 * heapstats-core.jar
   * HeapStats Analyzer に同梱される ```heapstats-core.jar```
-  * 本リポジトリに HeapStats 2.0.2 の JAR を登録しています
+  * 本リポジトリに HeapStats 2.0.4 の JAR を登録しています
 
 
 ## 使用方法
