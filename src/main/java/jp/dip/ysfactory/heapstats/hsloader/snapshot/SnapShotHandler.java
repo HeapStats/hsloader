@@ -1,7 +1,7 @@
 /*
  * SnapShotHandler.java
  *
- * Copyright (C) 2015-2016 Yasumasa Suenaga
+ * Copyright (C) 2015-2017 Yasumasa Suenaga
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,7 +20,16 @@
  */
 package jp.dip.ysfactory.heapstats.hsloader.snapshot;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import jp.co.ntt.oss.heapstats.container.snapshot.ChildObjectData;
+import jp.co.ntt.oss.heapstats.container.snapshot.ObjectData;
+import jp.co.ntt.oss.heapstats.container.snapshot.SnapShotHeader;
+import jp.co.ntt.oss.heapstats.parser.SnapShotParserEventHandler;
+import jp.dip.ysfactory.heapstats.hsloader.Processor;
+
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.UncheckedIOException;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -28,15 +37,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import jp.co.ntt.oss.heapstats.container.snapshot.ChildObjectData;
-import jp.co.ntt.oss.heapstats.container.snapshot.ObjectData;
-import jp.co.ntt.oss.heapstats.container.snapshot.SnapShotHeader;
-import jp.co.ntt.oss.heapstats.parser.SnapShotParserEventHandler;
-import jp.co.ntt.oss.heapstats.parser.SnapShotParserEventHandler.ParseResult;
-import org.elasticsearch.action.bulk.BulkProcessor;
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentFactory;
 
 /**
  * HeapStats SnapShot parser event handler.
@@ -53,7 +53,7 @@ public class SnapShotHandler implements SnapShotParserEventHandler{
     
     private List<ChildObjectDataEx> childrenList;
     
-    private final BulkProcessor bulkProcessor;
+    private final Processor processor;
     
     /**
      * ZoneId of SnapShot.
@@ -75,11 +75,11 @@ public class SnapShotHandler implements SnapShotParserEventHandler{
     /**
      * Constructor for SnapShotHandler.
      * 
-     * @param bulkProcessor BulkProcessor to Elasticsearch.
+     * @param processor Elasticsearch bulk operation processor.
      * @param zoneId ZoneId of SnapShot.
      */
-    public SnapShotHandler(BulkProcessor bulkProcessor, ZoneId zoneId){
-        this.bulkProcessor = bulkProcessor;
+    public SnapShotHandler(Processor processor, ZoneId zoneId){
+        this.processor = processor;
         this.zoneId = zoneId;
     }
 
@@ -102,26 +102,26 @@ public class SnapShotHandler implements SnapShotParserEventHandler{
         childrenList = new ArrayList<>();
         indexNameSuffix = header.getSnapShotDate().format(indexSuffixFormatter);
         currentTimestamp = header.getSnapShotDate().atZone(zoneId).toInstant().toString();
-        
-        try{
-            XContentBuilder jsonBuilder = XContentFactory.jsonBuilder()
-                                                         .startObject()
-                                                         .field("@timestamp", currentTimestamp)
-                                                         .field("numEntries", header.getNumEntries())
-                                                         .field("numInstances", header.getNumInstances())
-                                                         .field("cause", header.getCauseString())
-                                                         .field("gcCause", header.getGcCause())
-                                                         .field("fullCount", header.getFullCount())
-                                                         .field("yngCount", header.getYngCount())
-                                                         .field("gcTime", header.getGcTime())
-                                                         .field("newHeap", header.getNewHeap())
-                                                         .field("oldHeap", header.getOldHeap())
-                                                         .field("totalCapacity", header.getTotalCapacity())
-                                                         .field("metaspaceUsage", header.getMetaspaceUsage())
-                                                         .field("metaspaceCapacity", header.getMetaspaceCapacity())
-                                                         .field("safepointTime", header.getSafepointTime())
-                                                         .endObject();
-            bulkProcessor.add((new IndexRequest("heapstats-snapshot-summary-" + indexNameSuffix, "heapstats-snapshot-summary")).source(jsonBuilder));
+
+        StringWriter writer = new StringWriter();
+
+        try(JsonGenerator jsonGen = (new JsonFactory()).createGenerator(writer)){
+            jsonGen.writeStartObject();
+            jsonGen.writeStringField("@timestamp", currentTimestamp);
+            jsonGen.writeNumberField("numEntries", header.getNumEntries());
+            jsonGen.writeNumberField("numInstances", header.getNumInstances());
+            jsonGen.writeStringField("cause", header.getCauseString());
+            jsonGen.writeStringField("gcCause", header.getGcCause());
+            jsonGen.writeNumberField("fullCount", header.getFullCount());
+            jsonGen.writeNumberField("yngCount", header.getYngCount());
+            jsonGen.writeNumberField("gcTime", header.getGcTime());
+            jsonGen.writeNumberField("newHeap", header.getNewHeap());
+            jsonGen.writeNumberField("oldHeap", header.getOldHeap());
+            jsonGen.writeNumberField("totalCapacity", header.getTotalCapacity());
+            jsonGen.writeNumberField("metaspaceUsage", header.getMetaspaceUsage());
+            jsonGen.writeNumberField("metaspaceCapacity", header.getMetaspaceCapacity());
+            jsonGen.writeNumberField("safepointTime", header.getSafepointTime());
+            jsonGen.writeEndObject();
         }
         catch(IOException e){
             System.err.println(e.getLocalizedMessage());
@@ -132,6 +132,8 @@ public class SnapShotHandler implements SnapShotParserEventHandler{
             
             return SnapShotParserEventHandler.ParseResult.HEAPSTATS_PARSE_ABORT;
         }
+
+        processor.pushData("heapstats-snapshot-summary-" + indexNameSuffix, "heapstats-snapshot-summary", writer.toString());
         
         return SnapShotParserEventHandler.ParseResult.HEAPSTATS_PARSE_CONTINUE;
     }
@@ -142,20 +144,18 @@ public class SnapShotHandler implements SnapShotParserEventHandler{
     @Override
     public ParseResult onEntry(ObjectData data) {
         tagClassNameMap.put(data.getTag(), data.getName());
-        
-        try{
-            XContentBuilder jsonBuilder = XContentFactory.jsonBuilder()
-                                                         .startObject()
-                                                         .field("@timestamp", currentTimestamp)
-                                                         .field("tag", data.getTag())
-                                                         .field("name", data.getName())
-                                                         .field("classLoader", data.getClassLoader())
-                                                         .field("classLoaderTag", data.getClassLoaderTag())
-                                                         .field("count", data.getCount())
-                                                         .field("totalSize", data.getTotalSize())
-                                                         .endObject();
+        StringWriter writer = new StringWriter();
 
-            bulkProcessor.add((new IndexRequest("heapstats-snapshot-objects-" + indexNameSuffix, "heapstats-snapshot-objects")).source(jsonBuilder));
+        try(JsonGenerator jsonGen = (new JsonFactory()).createGenerator(writer)){
+            jsonGen.writeStartObject();
+            jsonGen.writeStringField("@timestamp", currentTimestamp);
+            jsonGen.writeNumberField("tag", data.getTag());
+            jsonGen.writeStringField("name", data.getName());
+            jsonGen.writeNumberField("classLoader", data.getClassLoader());
+            jsonGen.writeNumberField("classLoaderTag", data.getClassLoaderTag());
+            jsonGen.writeNumberField("count", data.getCount());
+            jsonGen.writeNumberField("totalSize", data.getTotalSize());
+            jsonGen.writeEndObject();
         }
         catch(IOException e){
             System.err.println(e.getLocalizedMessage());
@@ -166,7 +166,9 @@ public class SnapShotHandler implements SnapShotParserEventHandler{
             
             return SnapShotParserEventHandler.ParseResult.HEAPSTATS_PARSE_ABORT;
         }
-        
+
+        processor.pushData("heapstats-snapshot-objects-" + indexNameSuffix, "heapstats-snapshot-objects", writer.toString());
+
         return SnapShotParserEventHandler.ParseResult.HEAPSTATS_PARSE_CONTINUE;
     }
 
@@ -180,22 +182,24 @@ public class SnapShotHandler implements SnapShotParserEventHandler{
     }
     
     private void putChildData(ChildObjectDataEx child){
-        try{
-            XContentBuilder jsonBuilder = XContentFactory.jsonBuilder()
-                                                         .startObject()
-                                                         .field("@timestamp", currentTimestamp)
-                                                         .field("parentTag", child.getParentClassTag())
-                                                         .field("parentName", tagClassNameMap.get(child.getParentClassTag()))
-                                                         .field("tag", child.getTag())
-                                                         .field("name", tagClassNameMap.get(child.getTag()))
-                                                         .field("instalces", child.getInstances())
-                                                         .field("totalSize", child.getTotalSize())
-                                                         .endObject();
-            bulkProcessor.add((new IndexRequest("heapstats-snapshot-refs-" + indexNameSuffix, "heapstats-snapshot-refs")).source(jsonBuilder));
+        StringWriter writer = new StringWriter();
+
+        try(JsonGenerator jsonGen = (new JsonFactory()).createGenerator(writer)){
+            jsonGen.writeStartObject();
+            jsonGen.writeStringField("@timestamp", currentTimestamp);
+            jsonGen.writeNumberField("parentTag", child.getParentClassTag());
+            jsonGen.writeStringField("parentName", tagClassNameMap.get(child.getParentClassTag()));
+            jsonGen.writeNumberField("tag", child.getTag());
+            jsonGen.writeStringField("name", tagClassNameMap.get(child.getTag()));
+            jsonGen.writeNumberField("instalces", child.getInstances());
+            jsonGen.writeNumberField("totalSize", child.getTotalSize());
+            jsonGen.writeEndObject();
         }
         catch(IOException e){
             throw new UncheckedIOException(e);
         }
+
+        processor.pushData("heapstats-snapshot-refs-" + indexNameSuffix, "heapstats-snapshot-refs", writer.toString());
     }
 
     /**

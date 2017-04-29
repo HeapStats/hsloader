@@ -1,7 +1,7 @@
 /*
  * HSLoader.java
  *
- * Copyright (C) 2015-2016 Yasumasa Suenaga
+ * Copyright (C) 2015-2017 Yasumasa Suenaga
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,19 +20,8 @@
  */
 package jp.dip.ysfactory.heapstats.hsloader;
 
-import java.net.InetAddress;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import jp.dip.ysfactory.heapstats.hsloader.log.LogProcessor;
 import jp.dip.ysfactory.heapstats.hsloader.snapshot.SnapShotProcessor;
-import org.elasticsearch.action.bulk.BulkProcessor;
-import org.elasticsearch.action.bulk.BulkRequest;
-import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
 
 /**
@@ -41,33 +30,6 @@ import org.elasticsearch.transport.client.PreBuiltTransportClient;
  * @author Yasumasa Suenaga
  */
 public class HSLoader {
-    
-    private static class BulkProcessListener implements BulkProcessor.Listener{
-        
-        private final int timeout;
-        
-        public BulkProcessListener(int timeout){
-            this.timeout = timeout;
-        }
-
-        @Override
-        public void beforeBulk(long l, BulkRequest br) {
-            br.timeout(TimeValue.timeValueSeconds(timeout));
-        }
-
-        @Override
-        public void afterBulk(long l, BulkRequest req, BulkResponse res) {
-            if(res.hasFailures()){
-                throw new RuntimeException(res.buildFailureMessage());
-            }
-        }
-
-        @Override
-        public void afterBulk(long l, BulkRequest br, Throwable thrwbl) {
-            throw new RuntimeException(thrwbl);
-        }
-        
-    }
     
     private static class ExceptionHandler implements Thread.UncaughtExceptionHandler{
 
@@ -90,7 +52,6 @@ public class HSLoader {
 
     /**
      * @param args the command line arguments
-     * @throws java.lang.InterruptedException
      */
     public static void main(String[] args) throws Exception{
         Option opt;
@@ -103,29 +64,12 @@ public class HSLoader {
         }
         
         Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler());
-        
-        InetSocketTransportAddress addr = new InetSocketTransportAddress(InetAddress.getByName(opt.getHost()), opt.getPort());
-        
-        try(TransportClient client = (new PreBuiltTransportClient(Settings.EMPTY)).addTransportAddress(addr);
-            BulkProcessor bulkProcessor = BulkProcessor.builder(client, new BulkProcessListener(opt.getTimeout()))
-                                                       .setName("HSLoader bulk processor")
-                                                       .setBulkActions(opt.getBulkLevel())
-                                                       .setConcurrentRequests(Runtime.getRuntime().availableProcessors())
-                                                       .build()){
-            
-            Processor processor = null;
-            
-            if(opt.getParserMode() == Option.ParserMode.snapshot){
-                processor = new SnapShotProcessor(opt, bulkProcessor);
-            }
-            else if(opt.getParserMode() == Option.ParserMode.log){
-                processor = new LogProcessor(opt, bulkProcessor);
-            }
-            
-            Objects.requireNonNull(processor, "Processor must not be null");
+
+        try(Processor processor = (opt.getParserMode() == Option.ParserMode.log) ? new LogProcessor(opt) : new SnapShotProcessor(opt)) {
             processor.process();
-            
-            bulkProcessor.awaitClose(opt.getTimeout(), TimeUnit.SECONDS);
+
+            System.out.println();
+            System.out.println(processor.isSucceeded() ? "Succeeded" : "Failed");
         }
 
     }
