@@ -100,7 +100,7 @@ public class Option{
      * Print help strings.
      */
     public static void printOptions(){
-      System.out.println("HSLoader 0.2.0");
+      System.out.println("HSLoader 0.2.1");
       System.out.println("Copyright (C) 2015-2017 Yasumasa Suenaga");
       System.out.println();
       System.out.println("Usage:");
