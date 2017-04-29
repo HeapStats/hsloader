@@ -103,7 +103,7 @@ public abstract class Processor implements AutoCloseable{
      */
     public Processor(Option opt){
         this.opt = opt;
-        this.indexDataList = new ArrayList<>(opt.getBulkLevel());
+        this.indexDataList = new ArrayList<>(opt.getBulkRequests());
         this.succeeded = true;
 
         int timeoutVal = opt.getTimeout() * 1000;
@@ -152,7 +152,7 @@ public abstract class Processor implements AutoCloseable{
 
     public synchronized void pushData(String indexName, String indexType, String jsonData){
         indexDataList.add(new IndexData(indexName, indexType, jsonData));
-        if(indexDataList.size() == opt.getBulkLevel()){
+        if(indexDataList.size() == opt.getBulkRequests()){
             publish();
         }
     }

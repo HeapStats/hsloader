@@ -65,14 +65,14 @@ public class Option{
     private int port;
     
     /**
-     * Default bulk level.
+     * Default number of bulk requests.
      */
-    public static final int DEFAULT_BULK_LEVEL = 1000;
+    public static final int DEFAULT_BULK_REQUESTS = 1000;
     
     /**
      * Num of bulk requests.
      */
-    private int bulkLevel;
+    private int bulkRequests;
     
     /**
      * Default timezone.
@@ -111,7 +111,7 @@ public class Option{
       System.out.println("  --mode <snapshot>: Parser mode. (default: snapshot)");
       System.out.println("  --host <hostname>: Hostname of Elasticsearch. (default: localhost)");
       System.out.println("  --port <num>: HTTP port of Elasticsearch. (default: 9200)");
-      System.out.println("  --bulk <num>: Number of bulk requests to Elasticsearch. (default: 10)");
+      System.out.println("  --bulk <num>: Number of bulk requests to Elasticsearch. (default: 1000)");
       System.out.println("  --timezone <zone id>: Timezone of SnapShot. (default: System Default)");
       System.out.println("  --timeout <num>: Timeout in seconds (default: 60)");
     }
@@ -126,7 +126,7 @@ public class Option{
         parserMode = DEFAULT_PARSER_MODE;
         host = DEFAULT_HOST;
         port = DEFAULT_PORT;
-        bulkLevel = DEFAULT_BULK_LEVEL;
+        bulkRequests = DEFAULT_BULK_REQUESTS;
         zoneId = DEFAULT_TIMEZONE;
         files = new ArrayList<>();
         timeout = DEFAULT_TIMEOUT;
@@ -159,7 +159,7 @@ public class Option{
                     break;
 
                 case "--bulk":
-                    bulkLevel = Integer.parseInt(itr.next());
+                    bulkRequests = Integer.parseInt(itr.next());
                     break;
                     
                 case "--timezone":
@@ -207,11 +207,11 @@ public class Option{
     }
 
     /**
-     * Get bulk level.
-     * @return Bulk level.
+     * Get number of bulk requests.
+     * @return Number of bulk requests.
      */
-    public int getBulkLevel() {
-        return bulkLevel;
+    public int getBulkRequests() {
+        return bulkRequests;
     }
 
     /**
