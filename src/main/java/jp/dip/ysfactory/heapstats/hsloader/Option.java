@@ -1,7 +1,7 @@
 /*
  * Option.java
  *
- * Copyright (C) 2015-2016 Yasumasa Suenaga
+ * Copyright (C) 2015-2017 Yasumasa Suenaga
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -57,7 +57,7 @@ public class Option{
     /**
      * Default value of target port number.
      */
-    public static final int DEFAULT_PORT = 9300;
+    public static final int DEFAULT_PORT = 9200;
 
     /**
      * Port number of Elasticsearch.
@@ -110,7 +110,7 @@ public class Option{
       System.out.println("  --help: This help.");
       System.out.println("  --mode <snapshot>: Parser mode. (default: snapshot)");
       System.out.println("  --host <hostname>: Hostname of Elasticsearch. (default: localhost)");
-      System.out.println("  --port <num>: Port number of Elasticsearch. (default: 9300)");
+      System.out.println("  --port <num>: HTTP port of Elasticsearch. (default: 9200)");
       System.out.println("  --bulk <num>: Number of bulk requests to Elasticsearch. (default: 10)");
       System.out.println("  --timezone <zone id>: Timezone of SnapShot. (default: System Default)");
       System.out.println("  --timeout <num>: Timeout in seconds (default: 60)");

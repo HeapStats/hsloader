@@ -29,8 +29,8 @@ $ java -jar hsloader.jar [options] file1 file2 ...
   * Hostname of Elasticsearch
   * localhost is by default
 * --port
-  * Port number of Elasticsearch
-  * 9300 is by default
+  * HTTP port of Elasticsearch
+  * 9200 is by default
 * --bulk
   * Number of bulk transport
   * 1000 is by default
@@ -87,7 +87,7 @@ $ java -jar hsloader.jar [options] file1 file2 ...
   * デフォルト値は localhost
 * --port
   * Elasticsearch のポート番号
-  * デフォルト値は 9300
+  * デフォルト値は 9200
 * --bulk
   * 一度に投入するデータ量（バルク転送）
   * デフォルト値は 1000

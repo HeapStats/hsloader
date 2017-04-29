@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Yasumasa Suenaga
+ * Copyright (C) 2016-2017 Yasumasa Suenaga
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -22,7 +22,6 @@ import jp.co.ntt.oss.heapstats.lambda.ConsumerWrapper;
 import jp.co.ntt.oss.heapstats.parser.SnapShotParser;
 import jp.dip.ysfactory.heapstats.hsloader.Option;
 import jp.dip.ysfactory.heapstats.hsloader.Processor;
-import org.elasticsearch.action.bulk.BulkProcessor;
 
 /**
  * Processor class for HeapStats SnapShot files.
@@ -34,8 +33,8 @@ public class SnapShotProcessor extends Processor{
     /**
      * {@inheritDoc}
      */
-    public SnapShotProcessor(Option option, BulkProcessor bulkProcessor){
-        super(option, bulkProcessor);
+    public SnapShotProcessor(Option option){
+        super(option);
     }
 
     /**
@@ -44,7 +43,7 @@ public class SnapShotProcessor extends Processor{
     @Override
     public void process() {
         SnapShotParser parser = new SnapShotParser(true);
-        SnapShotHandler handler = new SnapShotHandler(bulkProcessor, opt.getZoneId());
+        SnapShotHandler handler = new SnapShotHandler(this, opt.getZoneId());
         ConsumerWrapper<String> parseConsumer = new ConsumerWrapper<>(f -> parser.parse(f, handler));
 
         opt.getFiles().forEach(parseConsumer);

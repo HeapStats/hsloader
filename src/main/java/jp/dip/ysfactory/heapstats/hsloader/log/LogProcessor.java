@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Yasumasa Suenaga
+ * Copyright (C) 2016-2017 Yasumasa Suenaga
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -18,22 +18,22 @@
  */
 package jp.dip.ysfactory.heapstats.hsloader.log;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
 import jp.co.ntt.oss.heapstats.container.log.DiffData;
 import jp.co.ntt.oss.heapstats.container.log.LogData;
 import jp.co.ntt.oss.heapstats.task.ParseLogFile;
 import jp.dip.ysfactory.heapstats.hsloader.Option;
 import jp.dip.ysfactory.heapstats.hsloader.Processor;
-import org.elasticsearch.action.bulk.BulkProcessor;
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.UncheckedIOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Processor class for HeapStats Resource Log (CSV) files.
@@ -60,68 +60,72 @@ public class LogProcessor extends Processor{
     /**
      * {@inheritDoc}
      */
-    public LogProcessor(Option opt, BulkProcessor bulkProcessor){
-        super(opt, bulkProcessor);
+    public LogProcessor(Option opt){
+        super(opt);
     }
     
     private void storeLogData(LogData logData){
-        try{
-            XContentBuilder jsonBuilder = XContentFactory.jsonBuilder()
-                                                         .startObject()
-                                                         .field("@timestamp", logData.getDateTime().atZone(opt.getZoneId()).toInstant().toString())
-                                                         .field("logCause", logData.getLogCause().toString())
-                                                         .field("javaVSSize", logData.getJavaVSSize())
-                                                         .field("javaRSSize", logData.getJavaRSSize())
-                                                         .field("jvmLiveThreads", logData.getJvmLiveThreads());
+        StringWriter writer = new StringWriter();
+
+        try(JsonGenerator jsonGen = (new JsonFactory()).createGenerator(writer)){
+            jsonGen.writeStartObject();
+            jsonGen.writeStringField("@timestamp", logData.getDateTime().atZone(opt.getZoneId()).toInstant().toString());
+            jsonGen.writeStringField("logCause", logData.getLogCause().toString());
+            jsonGen.writeNumberField("javaVSSize", logData.getJavaVSSize());
+            jsonGen.writeNumberField("javaRSSize", logData.getJavaRSSize());
+            jsonGen.writeNumberField("jvmLiveThreads", logData.getJvmLiveThreads());
 
             if(archivePointList.contains(logData.getDateTime())){
-                jsonBuilder.field("archivePoint", 0);
+                jsonGen.writeNumberField("archivePoint", 0);
             }
             if(rebootSuspectList.contains(logData.getDateTime())){
-                jsonBuilder.field("rebootPoint", 0);
+                jsonGen.writeNumberField("rebootPoint", 0);
             }
 
-            jsonBuilder.endObject();
-            bulkProcessor.add((new IndexRequest("heapstats-resource-log-" + logData.getDateTime().format(indexSuffixFormatter), "heapstats-resource-log")).source(jsonBuilder));
+            jsonGen.writeEndObject();
         }
         catch(IOException e){
             throw new UncheckedIOException(e);
         }
+
+        this.pushData("heapstats-resource-log-" + logData.getDateTime().format(indexSuffixFormatter), "heapstats-resource-log", writer.toString());
     }
     
     private void storeDiffData(DiffData diffData){
-        try{
-            XContentBuilder jsonBuilder = XContentFactory.jsonBuilder()
-                                                         .startObject()
-                                                         .field("@timestamp", diffData.getDateTime().atZone(opt.getZoneId()).toInstant().toString())
-                                                         .field("javaUserUsage", diffData.getJavaUserUsage())
-                                                         .field("javaSysUsage", diffData.getJavaSysUsage())
-                                                         .field("cpuUserUsage", diffData.getCpuUserUsage())
-                                                         .field("cpuNiceUsage", diffData.getCpuNiceUsage())
-                                                         .field("cpuSysUsage", diffData.getCpuSysUsage())
-                                                         .field("cpuIdleUsage", diffData.getCpuIdleUsage())
-                                                         .field("cpuIOWaitUsage", diffData.getCpuIOWaitUsage())
-                                                         .field("cpuIRQUsage", diffData.getCpuIRQUsage())
-                                                         .field("cpuSoftIRQUsage", diffData.getCpuSoftIRQUsage())
-                                                         .field("cpuStealUsage", diffData.getCpuStealUsage())
-                                                         .field("cpuGuestUsage", diffData.getCpuGuestUsage())
-                                                         .field("jvmSyncPark", diffData.getJvmSyncPark())
-                                                         .field("jvmSafepointTime", diffData.getJvmSafepointTime())
-                                                         .field("jvmSafepoints", diffData.getJvmSafepoints());
+        StringWriter writer = new StringWriter();
+
+        try(JsonGenerator jsonGen = (new JsonFactory()).createGenerator(writer)){
+            jsonGen.writeStartObject();
+            jsonGen.writeStringField("@timestamp", diffData.getDateTime().atZone(opt.getZoneId()).toInstant().toString());
+            jsonGen.writeNumberField("javaUserUsage", diffData.getJavaUserUsage());
+            jsonGen.writeNumberField("javaSysUsage", diffData.getJavaSysUsage());
+            jsonGen.writeNumberField("cpuUserUsage", diffData.getCpuUserUsage());
+            jsonGen.writeNumberField("cpuNiceUsage", diffData.getCpuNiceUsage());
+            jsonGen.writeNumberField("cpuSysUsage", diffData.getCpuSysUsage());
+            jsonGen.writeNumberField("cpuIdleUsage", diffData.getCpuIdleUsage());
+            jsonGen.writeNumberField("cpuIOWaitUsage", diffData.getCpuIOWaitUsage());
+            jsonGen.writeNumberField("cpuIRQUsage", diffData.getCpuIRQUsage());
+            jsonGen.writeNumberField("cpuSoftIRQUsage", diffData.getCpuSoftIRQUsage());
+            jsonGen.writeNumberField("cpuStealUsage", diffData.getCpuStealUsage());
+            jsonGen.writeNumberField("cpuGuestUsage", diffData.getCpuGuestUsage());
+            jsonGen.writeNumberField("jvmSyncPark", diffData.getJvmSyncPark());
+            jsonGen.writeNumberField("jvmSafepointTime", diffData.getJvmSafepointTime());
+            jsonGen.writeNumberField("jvmSafepoints", diffData.getJvmSafepoints());
 
             if(archivePointList.contains(diffData.getDateTime())){
-                jsonBuilder.field("archivePoint", 0);
+                jsonGen.writeNumberField("archivePoint", 0);
             }
             if(rebootSuspectList.contains(diffData.getDateTime())){
-                jsonBuilder.field("rebootPoint", 0);
+                jsonGen.writeNumberField("rebootPoint", 0);
             }
 
-            jsonBuilder.endObject();
-            bulkProcessor.add((new IndexRequest("heapstats-resource-diff-" + diffData.getDateTime().format(indexSuffixFormatter), "heapstats-resource-diff")).source(jsonBuilder));
+            jsonGen.writeEndObject();
         }
         catch(IOException e){
             throw new UncheckedIOException(e);
         }
+
+        this.pushData("heapstats-resource-diff-" + diffData.getDateTime().format(indexSuffixFormatter), "heapstats-resource-diff", writer.toString());
     }
 
     /**
