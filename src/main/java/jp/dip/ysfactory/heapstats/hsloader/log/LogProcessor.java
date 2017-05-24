@@ -63,7 +63,26 @@ public class LogProcessor extends Processor{
     public LogProcessor(Option opt){
         super(opt);
     }
-    
+
+    private void writeTag(JsonGenerator jsonGen, LocalDateTime dateTime) throws IOException {
+        boolean isArchive = archivePointList.contains(dateTime);
+        boolean isReboot = rebootSuspectList.contains(dateTime);
+
+        if(isArchive || isReboot){
+            jsonGen.writeArrayFieldStart("tag");
+
+            if(isArchive){
+                jsonGen.writeString("archive");
+            }
+            if(isReboot){
+                jsonGen.writeString("reboot");
+            }
+
+            jsonGen.writeEndArray();
+        }
+
+    }
+
     private void storeLogData(LogData logData){
         StringWriter writer = new StringWriter();
 
@@ -75,12 +94,7 @@ public class LogProcessor extends Processor{
             jsonGen.writeNumberField("javaRSSize", logData.getJavaRSSize());
             jsonGen.writeNumberField("jvmLiveThreads", logData.getJvmLiveThreads());
 
-            if(archivePointList.contains(logData.getDateTime())){
-                jsonGen.writeNumberField("archivePoint", 0);
-            }
-            if(rebootSuspectList.contains(logData.getDateTime())){
-                jsonGen.writeNumberField("rebootPoint", 0);
-            }
+            writeTag(jsonGen, logData.getDateTime());
 
             jsonGen.writeEndObject();
         }
@@ -112,12 +126,7 @@ public class LogProcessor extends Processor{
             jsonGen.writeNumberField("jvmSafepointTime", diffData.getJvmSafepointTime());
             jsonGen.writeNumberField("jvmSafepoints", diffData.getJvmSafepoints());
 
-            if(archivePointList.contains(diffData.getDateTime())){
-                jsonGen.writeNumberField("archivePoint", 0);
-            }
-            if(rebootSuspectList.contains(diffData.getDateTime())){
-                jsonGen.writeNumberField("rebootPoint", 0);
-            }
+            writeTag(jsonGen, diffData.getDateTime());
 
             jsonGen.writeEndObject();
         }
