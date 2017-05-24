@@ -33,6 +33,7 @@ import java.io.UncheckedIOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -50,7 +51,7 @@ public class LogProcessor extends Processor{
     /**
      * List of archive point.
      */
-    private List<LocalDateTime> archivePointList;
+    private Map<LocalDateTime, String> archivePoints;
     
     /**
      * List of reboot suspection.
@@ -65,7 +66,7 @@ public class LogProcessor extends Processor{
     }
 
     private void writeTag(JsonGenerator jsonGen, LocalDateTime dateTime) throws IOException {
-        boolean isArchive = archivePointList.contains(dateTime);
+        boolean isArchive = archivePoints.containsKey(dateTime);
         boolean isReboot = rebootSuspectList.contains(dateTime);
 
         if(isArchive || isReboot){
@@ -79,6 +80,9 @@ public class LogProcessor extends Processor{
             }
 
             jsonGen.writeEndArray();
+        }
+        if(isArchive){
+            jsonGen.writeStringField("archivePath", archivePoints.get(dateTime));
         }
 
     }
@@ -146,12 +150,11 @@ public class LogProcessor extends Processor{
         
         System.out.println("Parsing...");
         parser.run();
-        
-        archivePointList = parser.getLogEntries()
-                                 .stream()
-                                 .filter(l -> l.getArchivePath() != null)
-                                 .map(l -> l.getDateTime())
-                                 .collect(Collectors.toList());
+
+        archivePoints = parser.getLogEntries()
+                              .stream()
+                              .filter(l -> l.getArchivePath() != null)
+                              .collect(Collectors.toMap(LogData::getDateTime, LogData::getArchivePath));
         rebootSuspectList = parser.getDiffEntries()
                                   .stream()
                                   .filter(d -> d.hasMinusData())
