@@ -1,22 +1,5 @@
 [
   {
-    "_id": "HeapStats-resouces",
-    "_type": "dashboard",
-    "_source": {
-      "title": "HeapStats resouces",
-      "hits": 0,
-      "description": "",
-      "panelsJSON": "[{\"id\":\"Java-CPU\",\"type\":\"visualization\",\"panelIndex\":1,\"size_x\":6,\"size_y\":2,\"col\":1,\"row\":1},{\"id\":\"Java-Process-Memory\",\"type\":\"visualization\",\"panelIndex\":2,\"size_x\":6,\"size_y\":2,\"col\":1,\"row\":3},{\"id\":\"Parks\",\"type\":\"visualization\",\"panelIndex\":3,\"size_x\":6,\"size_y\":2,\"col\":1,\"row\":5},{\"id\":\"Safepoints\",\"type\":\"visualization\",\"panelIndex\":4,\"size_x\":6,\"size_y\":2,\"col\":7,\"row\":5},{\"id\":\"System-CPU\",\"type\":\"visualization\",\"panelIndex\":5,\"size_x\":6,\"size_y\":2,\"col\":7,\"row\":1},{\"id\":\"Threads\",\"type\":\"visualization\",\"panelIndex\":6,\"size_x\":6,\"size_y\":2,\"col\":7,\"row\":3}]",
-      "optionsJSON": "{\"darkTheme\":false}",
-      "uiStateJSON": "{}",
-      "version": 1,
-      "timeRestore": false,
-      "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"filter\":[{\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}}}]}"
-      }
-    }
-  },
-  {
     "_id": "HeapStats-snapshots",
     "_type": "dashboard",
     "_source": {
@@ -34,16 +17,19 @@
     }
   },
   {
-    "_id": "System-CPU",
-    "_type": "visualization",
+    "_id": "HeapStats-resouces",
+    "_type": "dashboard",
     "_source": {
-      "title": "System CPU",
-      "visState": "{\"title\":\"System CPU\",\"type\":\"timelion\",\"params\":{\"expression\":\"$i=heapstats-resource-diff-* .es(index=$i, metric=max:cpuUserUsage).label(\\\"%user\\\").lines(fill=10,stack=true).color(red), .es(index=$i, metric=max:cpuNiceUsage).label(\\\"%nice\\\").lines(fill=10,stack=true).color(limegreen), .es(index=$i, metric=max:cpuSysUsage).label(\\\"%sys\\\").lines(fill=10,stack=true).color(blue),  .es(index=$i, metric=max:cpuIdleUsage).label(\\\"%idle\\\").lines(fill=10,stack=true).color(orange), .es(index=$i, metric=max:cpuIOWaitUsage).label(\\\"%iowait\\\").lines(fill=10,stack=true).color(violet), .es(index=$i, metric=max:cpuIRQUsage).label(\\\"%irq\\\").lines(fill=10,stack=true).color(skyblue), .es(index=$i, metric=max:cpuSoftIRQUsage).label(\\\"%softirq\\\").lines(fill=10,stack=true).color(bisque), .es(index=$i, metric=max:cpuStealUsage).label(\\\"%steal\\\").lines(fill=10,stack=true).color(darkgray), .es(index=$i, metric=max:cpuGuestUsage ).label(\\\"%guest\\\").lines(fill=10,stack=true).color(maroon), .es(index=$i, metric=max:archivePoint).label(\\\"Archive Point\\\").points(symbol=cross, radius=10).color(black), .es(index=$i, metric=max:rebootPoint).label(\\\"Reboot Point\\\").points(symbol=cross, radius=10).color(yellow)\",\"interval\":\"auto\"},\"aggs\":[],\"listeners\":{}}",
-      "uiStateJSON": "{}",
+      "title": "HeapStats resouces",
+      "hits": 0,
       "description": "",
+      "panelsJSON": "[{\"col\":1,\"id\":\"4b4347e0-403e-11e7-8665-e7b50d328b54\",\"panelIndex\":7,\"row\":1,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"col\":7,\"id\":\"cc975b20-4042-11e7-8665-e7b50d328b54\",\"panelIndex\":8,\"row\":1,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"col\":1,\"id\":\"8a11ddf0-4044-11e7-8665-e7b50d328b54\",\"panelIndex\":9,\"row\":4,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"col\":7,\"id\":\"31deafb0-4048-11e7-8665-e7b50d328b54\",\"panelIndex\":10,\"row\":4,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"col\":1,\"id\":\"faa623d0-4046-11e7-8665-e7b50d328b54\",\"panelIndex\":11,\"row\":7,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"col\":7,\"id\":\"d20e2ed0-4047-11e7-8665-e7b50d328b54\",\"panelIndex\":12,\"row\":7,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"}]",
+      "optionsJSON": "{\"darkTheme\":false}",
+      "uiStateJSON": "{}",
       "version": 1,
+      "timeRestore": false,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"filter\":[]}"
+        "searchSourceJSON": "{\"filter\":[{\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\"}}}],\"highlightAll\":true,\"version\":true}"
       }
     }
   },
@@ -90,20 +76,6 @@
     }
   },
   {
-    "_id": "Java-CPU",
-    "_type": "visualization",
-    "_source": {
-      "title": "Java CPU",
-      "visState": "{\"title\":\"Java CPU\",\"type\":\"timelion\",\"params\":{\"expression\":\"$i=heapstats-resource-diff-* .es(index=$i, metric=max:javaUserUsage).label(\\\"%user\\\").lines(fill=10,stack=true).color(red), .es(index=$i, metric=max:javaSysUsage).label(\\\"%sys\\\").lines(fill=10,stack=true).color(blue), .es(index=$i, metric=max:archivePoint).label(\\\"Archive Point\\\").points(symbol=cross, radius=10).color(black), .es(index=$i, metric=max:rebootPoint).label(\\\"Reboot Point\\\").points(symbol=cross, radius=10).color(yellow)\",\"interval\":\"auto\"},\"aggs\":[],\"listeners\":{}}",
-      "uiStateJSON": "{}",
-      "description": "",
-      "version": 1,
-      "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\"}},\"filter\":[]}"
-      }
-    }
-  },
-  {
     "_id": "Top-5-references-from-Object[]",
     "_type": "visualization",
     "_source": {
@@ -114,20 +86,6 @@
       "version": 1,
       "kibanaSavedObjectMeta": {
         "searchSourceJSON": "{\"index\":\"heapstats-snapshot-refs-*\",\"query\":{\"query_string\":{\"query\":\"parentName.keyword: \\\"java.lang.Object []\\\"\",\"analyze_wildcard\":true}},\"filter\":[]}"
-      }
-    }
-  },
-  {
-    "_id": "GC-count",
-    "_type": "visualization",
-    "_source": {
-      "title": "GC count",
-      "visState": "{\"title\":\"GC count\",\"type\":\"line\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"showCircles\":true,\"smoothLines\":false,\"interpolate\":\"linear\",\"scale\":\"linear\",\"drawLinesBetweenPoints\":true,\"radiusRatio\":9,\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"max\",\"schema\":\"metric\",\"params\":{\"field\":\"yngCount\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"max\",\"schema\":\"metric\",\"params\":{\"field\":\"fullCount\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}",
-      "uiStateJSON": "{}",
-      "description": "",
-      "version": 1,
-      "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"heapstats-snapshot-summary-*\",\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"filter\":[]}"
       }
     }
   },
@@ -146,58 +104,100 @@
     }
   },
   {
-    "_id": "Java-Process-Memory",
+    "_id": "GC-count",
+    "_type": "visualization",
+    "_source": {
+      "title": "GC count",
+      "visState": "{\"title\":\"GC count\",\"type\":\"line\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"showCircles\":true,\"smoothLines\":false,\"interpolate\":\"linear\",\"scale\":\"linear\",\"drawLinesBetweenPoints\":true,\"radiusRatio\":9,\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"max\",\"schema\":\"metric\",\"params\":{\"field\":\"yngCount\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"max\",\"schema\":\"metric\",\"params\":{\"field\":\"fullCount\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"heapstats-snapshot-summary-*\",\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "4b4347e0-403e-11e7-8665-e7b50d328b54",
+    "_type": "visualization",
+    "_source": {
+      "title": "Java CPU",
+      "visState": "{\"title\":\"Java CPU\",\"type\":\"metrics\",\"params\":{\"id\":\"62308860-403d-11e7-8665-e7b50d328b54\",\"type\":\"timeseries\",\"series\":[{\"id\":\"62308861-403d-11e7-8665-e7b50d328b54\",\"color\":\"rgba(255,0,0,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"6230af70-403d-11e7-8665-e7b50d328b54\",\"type\":\"max\",\"field\":\"javaUserUsage\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":\"1\",\"stacked\":\"stacked\",\"label\":\"%user\"},{\"id\":\"0da44970-403e-11e7-8665-e7b50d328b54\",\"color\":\"rgba(0,0,255,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"0da44971-403e-11e7-8665-e7b50d328b54\",\"type\":\"max\",\"field\":\"javaSysUsage\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":\"1\",\"stacked\":\"stacked\",\"label\":\"%sys\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"annotations\":[{\"fields\":\"tag,archivePath\",\"template\":\"Archived to {{archivePath}}\",\"index_pattern\":\"heapstats-resource-diff-*\",\"query_string\":\"tag:archive\",\"id\":\"b2c77bd0-403d-11e7-8665-e7b50d328b54\",\"color\":\"rgba(0,0,0,1)\",\"time_field\":\"@timestamp\",\"icon\":\"fa-exclamation-triangle\"},{\"fields\":\"tag\",\"template\":\"reboot\",\"index_pattern\":\"heapstats-resource-diff-*\",\"query_string\":\"tag:reboot\",\"id\":\"f01533b0-4042-11e7-8665-e7b50d328b54\",\"color\":\"rgba(255,255,0,1)\",\"time_field\":\"@timestamp\",\"icon\":\"fa-bolt\"}],\"gauge_color_rules\":[{\"id\":\"3bbcabe0-403e-11e7-8665-e7b50d328b54\"}],\"gauge_width\":10,\"gauge_inner_width\":10,\"gauge_style\":\"half\",\"background_color_rules\":[{\"id\":\"4033b510-403e-11e7-8665-e7b50d328b54\"}],\"axis_min\":\"0\"},\"aggs\":[],\"listeners\":{}}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\"}},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "8a11ddf0-4044-11e7-8665-e7b50d328b54",
     "_type": "visualization",
     "_source": {
       "title": "Java Process Memory",
-      "visState": "{\"title\":\"Java Process Memory\",\"type\":\"timelion\",\"params\":{\"expression\":\"$i=heapstats-resource-log-* .es(index=$i, metric=max:javaRSSize).label(\\\"RSS\\\").lines().color(red), .es(index=$i, metric=max:javaVSSize).label(\\\"VSZ\\\").lines().color(blue), .es(index=$i, metric=max:archivePoint).label(\\\"Archive Point\\\").points(symbol=cross, radius=10).color(black), .es(index=$i, metric=max:rebootPoint).label(\\\"Reboot Point\\\").points(symbol=cross, radius=10).color(yellow)\",\"interval\":\"auto\"},\"aggs\":[],\"listeners\":{}}",
+      "visState": "{\"title\":\"Java Process Memory\",\"type\":\"metrics\",\"params\":{\"id\":\"1d01c050-4043-11e7-8665-e7b50d328b54\",\"type\":\"timeseries\",\"series\":[{\"id\":\"1d01c051-4043-11e7-8665-e7b50d328b54\",\"color\":\"rgba(0,0,255,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"1d01c052-4043-11e7-8665-e7b50d328b54\",\"type\":\"max\",\"field\":\"javaVSSize\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":\"0\",\"stacked\":\"none\",\"label\":\"VSZ\",\"value_template\":\"{{value}} bytes\",\"split_filters\":[{\"color\":\"rgba(0,0,255,1)\",\"id\":\"bfcb2ec0-4043-11e7-8665-e7b50d328b54\"}]},{\"id\":\"11196440-4044-11e7-8665-e7b50d328b54\",\"color\":\"rgba(255,0,0,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"11196441-4044-11e7-8665-e7b50d328b54\",\"type\":\"max\",\"field\":\"javaRSSize\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":\"0\",\"stacked\":\"none\",\"label\":\"RSS\",\"value_template\":\"{{value}} bytes\",\"split_filters\":[{\"color\":\"rgba(0,0,255,1)\",\"id\":\"bfcb2ec0-4043-11e7-8665-e7b50d328b54\"}]}],\"time_field\":\"@timestamp\",\"index_pattern\":\"*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"annotations\":[{\"fields\":\"tag,archivePath\",\"template\":\"Archived to {{archivePath}}\",\"index_pattern\":\"heapstats-resource-log-*\",\"query_string\":\"tag:archive\",\"id\":\"32a4e2b0-4044-11e7-8665-e7b50d328b54\",\"color\":\"rgba(0,0,0,1)\",\"time_field\":\"@timestamp\",\"icon\":\"fa-exclamation-triangle\"},{\"fields\":\"tag\",\"template\":\"reboot\",\"index_pattern\":\"heapstats-resource-log-*\",\"query_string\":\"tag:reboot\",\"id\":\"6eb5c710-4044-11e7-8665-e7b50d328b54\",\"color\":\"rgba(255,255,0,1)\",\"time_field\":\"@timestamp\",\"icon\":\"fa-bolt\"}],\"axis_min\":\"0\"},\"aggs\":[],\"listeners\":{}}",
       "uiStateJSON": "{}",
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"filter\":[]}"
+        "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\"}},\"filter\":[]}"
       }
     }
   },
   {
-    "_id": "Threads",
-    "_type": "visualization",
-    "_source": {
-      "title": "Threads",
-      "visState": "{\"title\":\"Threads\",\"type\":\"timelion\",\"params\":{\"expression\":\"$i=heapstats-resource-log-* .es(index=$i, metric=max:jvmLiveThreads).label(\\\"Threads\\\").lines().color(red), .es(index=$i, metric=max:archivePoint).label(\\\"Archive Point\\\").points(symbol=cross, radius=10).color(black), .es(index=$i, metric=max:rebootPoint).label(\\\"Reboot Point\\\").points(symbol=cross, radius=10).color(yellow)\",\"interval\":\"auto\"},\"aggs\":[],\"listeners\":{}}",
-      "uiStateJSON": "{}",
-      "description": "",
-      "version": 1,
-      "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\"}},\"filter\":[]}"
-      }
-    }
-  },
-  {
-    "_id": "Parks",
+    "_id": "faa623d0-4046-11e7-8665-e7b50d328b54",
     "_type": "visualization",
     "_source": {
       "title": "Parks",
-      "visState": "{\"title\":\"Parks\",\"type\":\"timelion\",\"params\":{\"expression\":\"$i=heapstats-resource-diff-* .es(index=$i, metric=max:jvmSyncPark).label(\\\"Parks\\\").lines().color(blue), .es(index=$i, metric=max:archivePoint).label(\\\"Archive Point\\\").points(symbol=cross, radius=10).color(black), .es(index=$i, metric=max:rebootPoint).label(\\\"Reboot Point\\\").points(symbol=cross, radius=10).color(yellow)\",\"interval\":\"auto\"},\"aggs\":[],\"listeners\":{}}",
+      "visState": "{\"title\":\"Parks\",\"type\":\"metrics\",\"params\":{\"id\":\"929d4c00-4046-11e7-8665-e7b50d328b54\",\"type\":\"timeseries\",\"series\":[{\"id\":\"929d4c01-4046-11e7-8665-e7b50d328b54\",\"color\":\"rgba(0,0,255,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"929d4c02-4046-11e7-8665-e7b50d328b54\",\"type\":\"max\",\"field\":\"jvmSyncPark\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":\"0\",\"stacked\":\"none\",\"label\":\"Parks\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"annotations\":[{\"fields\":\"tag,archivePath\",\"template\":\"Archived to {{archivePath}}\",\"index_pattern\":\"heapstats-resource-diff-*\",\"query_string\":\"tag:archive\",\"id\":\"c0e2b1e0-4046-11e7-8665-e7b50d328b54\",\"color\":\"rgba(0,0,0,1)\",\"time_field\":\"@timestamp\",\"icon\":\"fa-exclamation-triangle\"},{\"fields\":\"tag\",\"template\":\"reboot\",\"index_pattern\":\"heapstats-resource-diff-*\",\"query_string\":\"tag:reboot\",\"id\":\"dea01150-4046-11e7-8665-e7b50d328b54\",\"color\":\"rgba(255,255,0,1)\",\"time_field\":\"@timestamp\",\"icon\":\"fa-bolt\"}],\"axis_min\":\"0\"},\"aggs\":[],\"listeners\":{}}",
       "uiStateJSON": "{}",
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\"}},\"filter\":[]}"
+        "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\"}},\"filter\":[]}"
       }
     }
   },
   {
-    "_id": "Safepoints",
+    "_id": "d20e2ed0-4047-11e7-8665-e7b50d328b54",
     "_type": "visualization",
     "_source": {
       "title": "Safepoints",
-      "visState": "{\"title\":\"Safepoints\",\"type\":\"timelion\",\"params\":{\"expression\":\"$i=heapstats-resource-diff-* .es(index=$i, metric=max:jvmSafepoints).label(\\\"safepoints\\\").lines().color(limegreen), .es(index=$i, metric=max:jvmSafepointTime).yaxis(2).label(\\\"safepoint time\\\").lines().color(orange), .es(index=$i, metric=max:archivePoint).label(\\\"Archive Point\\\").points(symbol=cross, radius=10).color(black), .es(index=$i, metric=max:rebootPoint).label(\\\"Reboot Point\\\").points(symbol=cross, radius=10).color(yellow)\",\"interval\":\"auto\"},\"aggs\":[],\"listeners\":{}}",
+      "visState": "{\"title\":\"Safepoints\",\"type\":\"metrics\",\"params\":{\"id\":\"11323c10-4047-11e7-8665-e7b50d328b54\",\"type\":\"timeseries\",\"series\":[{\"id\":\"11323c11-4047-11e7-8665-e7b50d328b54\",\"color\":\"rgba(50,205,50,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"11323c12-4047-11e7-8665-e7b50d328b54\",\"type\":\"max\",\"field\":\"jvmSafepoints\"}],\"seperate_axis\":1,\"axis_position\":\"left\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":\"0\",\"stacked\":\"none\",\"label\":\"Count\"},{\"id\":\"562d1420-4047-11e7-8665-e7b50d328b54\",\"color\":\"rgba(255,165,0,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"562d1421-4047-11e7-8665-e7b50d328b54\",\"type\":\"max\",\"field\":\"jvmSafepointTime\"}],\"seperate_axis\":1,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":\"0\",\"stacked\":\"none\",\"label\":\"Elapsed time\",\"value_template\":\"{{value}} ms\",\"axis_min\":\"0\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"annotations\":[{\"fields\":\"tag,archivePath\",\"template\":\"Archived to {{archivePath}}\",\"index_pattern\":\"heapstats-resource-diff-*\",\"query_string\":\"tag:archive\",\"id\":\"9f4f27b0-4047-11e7-8665-e7b50d328b54\",\"color\":\"rgba(0,0,0,1)\",\"time_field\":\"@timestamp\",\"icon\":\"fa-exclamation-triangle\"},{\"fields\":\"tag\",\"template\":\"reboot\",\"index_pattern\":\"heapstats-resource-diff-*\",\"query_string\":\"tag:reboot\",\"id\":\"bfeceac0-4047-11e7-8665-e7b50d328b54\",\"color\":\"rgba(255,255,0,1)\",\"time_field\":\"@timestamp\",\"icon\":\"fa-bolt\"}],\"axis_min\":\"0\"},\"aggs\":[],\"listeners\":{}}",
       "uiStateJSON": "{}",
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"filter\":[]}"
+        "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\"}},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "cc975b20-4042-11e7-8665-e7b50d328b54",
+    "_type": "visualization",
+    "_source": {
+      "title": "System CPU",
+      "visState": "{\"title\":\"System CPU\",\"type\":\"metrics\",\"params\":{\"id\":\"5bb75120-403e-11e7-8665-e7b50d328b54\",\"type\":\"timeseries\",\"series\":[{\"id\":\"5bb75121-403e-11e7-8665-e7b50d328b54\",\"color\":\"rgba(255,0,0,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"5bb75122-403e-11e7-8665-e7b50d328b54\",\"type\":\"max\",\"field\":\"cpuUserUsage\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":\"1\",\"stacked\":\"stacked\",\"label\":\"%user\"},{\"id\":\"bdebb2a0-403e-11e7-8665-e7b50d328b54\",\"color\":\"rgba(124,252,0,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"bdebd9b0-403e-11e7-8665-e7b50d328b54\",\"type\":\"max\",\"field\":\"cpuNiceUsage\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":\"1\",\"stacked\":\"stacked\",\"label\":\"%nice\"},{\"id\":\"3e5080b0-403f-11e7-8665-e7b50d328b54\",\"color\":\"rgba(0,0,255,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"3e5080b1-403f-11e7-8665-e7b50d328b54\",\"type\":\"max\",\"field\":\"cpuSysUsage\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":\"1\",\"stacked\":\"stacked\",\"label\":\"%sys\"},{\"id\":\"63809d20-403f-11e7-8665-e7b50d328b54\",\"color\":\"rgba(255,165,0,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"63809d21-403f-11e7-8665-e7b50d328b54\",\"type\":\"max\",\"field\":\"cpuIdleUsage\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":\"1\",\"stacked\":\"stacked\",\"label\":\"%idle\"},{\"id\":\"628d0370-4041-11e7-8665-e7b50d328b54\",\"color\":\"rgba(238,130,238,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"628d2a80-4041-11e7-8665-e7b50d328b54\",\"type\":\"max\",\"field\":\"cpuIOWaitUsage\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":\"1\",\"stacked\":\"stacked\",\"label\":\"%ioutil\"},{\"id\":\"8d9d5600-4041-11e7-8665-e7b50d328b54\",\"color\":\"rgba(135,206,235,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"8d9d5601-4041-11e7-8665-e7b50d328b54\",\"type\":\"max\",\"field\":\"cpuIRQUsage\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":\"1\",\"stacked\":\"stacked\",\"label\":\"%irq\"},{\"id\":\"b54f3b50-4041-11e7-8665-e7b50d328b54\",\"color\":\"rgba(255,228,196,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"b54f3b51-4041-11e7-8665-e7b50d328b54\",\"type\":\"max\",\"field\":\"cpuSoftIRQUsage\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":\"1\",\"stacked\":\"stacked\",\"label\":\"%softirq\"},{\"id\":\"03dc5500-4042-11e7-8665-e7b50d328b54\",\"color\":\"rgba(169,169,169,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"03dc5501-4042-11e7-8665-e7b50d328b54\",\"type\":\"max\",\"field\":\"cpuStealUsage\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":\"1\",\"stacked\":\"stacked\",\"label\":\"%steal\"},{\"id\":\"17527ab0-4042-11e7-8665-e7b50d328b54\",\"color\":\"rgba(128,0,0,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"17527ab1-4042-11e7-8665-e7b50d328b54\",\"type\":\"max\",\"field\":\"cpuGuestUsage\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":\"1\",\"stacked\":\"stacked\",\"label\":\"%guest\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"annotations\":[{\"fields\":\"tag,archivePath\",\"template\":\"Archived to {{archivePath}}\",\"index_pattern\":\"heapstats-resource-diff-*\",\"query_string\":\"tag:archive\",\"id\":\"3ee98500-4042-11e7-8665-e7b50d328b54\",\"color\":\"rgba(0,0,0,1)\",\"time_field\":\"@timestamp\",\"icon\":\"fa-exclamation-triangle\"},{\"fields\":\"tag\",\"template\":\"reboot\",\"index_pattern\":\"heapstats-resource-diff-*\",\"query_string\":\"tag:reboot\",\"id\":\"aa3ec8b0-4042-11e7-8665-e7b50d328b54\",\"color\":\"rgba(255,255,0,1)\",\"time_field\":\"@timestamp\",\"icon\":\"fa-bolt\"}],\"axis_min\":\"0\"},\"aggs\":[],\"listeners\":{}}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\"}},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "31deafb0-4048-11e7-8665-e7b50d328b54",
+    "_type": "visualization",
+    "_source": {
+      "title": "Threads",
+      "visState": "{\"title\":\"Threads\",\"type\":\"metrics\",\"params\":{\"id\":\"e4a34350-4047-11e7-8665-e7b50d328b54\",\"type\":\"timeseries\",\"series\":[{\"id\":\"e4a34351-4047-11e7-8665-e7b50d328b54\",\"color\":\"rgba(255,0,0,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"e4a34352-4047-11e7-8665-e7b50d328b54\",\"type\":\"max\",\"field\":\"jvmLiveThreads\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":\"0\",\"stacked\":\"none\",\"label\":\"Threads\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"annotations\":[{\"fields\":\"tag,archivePath\",\"template\":\"Archived to {{archivePath}}\",\"index_pattern\":\"heapstats-resource-log-*\",\"query_string\":\"tag:archive\",\"id\":\"002cabc0-4048-11e7-8665-e7b50d328b54\",\"color\":\"rgba(0,0,0,1)\",\"time_field\":\"@timestamp\",\"icon\":\"fa-exclamation-triangle\"},{\"fields\":\"tag\",\"template\":\"reboot\",\"index_pattern\":\"heapstats-resource-log-*\",\"query_string\":\"tag:reboot\",\"id\":\"1b2aeb30-4048-11e7-8665-e7b50d328b54\",\"color\":\"rgba(255,255,0,1)\",\"time_field\":\"@timestamp\",\"icon\":\"fa-bolt\"}],\"axis_min\":\"0\"},\"aggs\":[],\"listeners\":{}}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\"}},\"filter\":[]}"
       }
     }
   }

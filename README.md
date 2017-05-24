@@ -44,7 +44,7 @@ $ java -jar hsloader.jar [options] file1 file2 ...
 
 ## Sample dashboard
 
-```kibana-dashboard.json``` in this repository provides sample dashboard of HSLoader. You can use it on Kibana 5 or later.
+```kibana-dashboard.json``` in this repository provides sample dashboard of HSLoader. You can use it on Kibana 5.4 or later.
 If you use this dashboard, you need to define indices as below:
 
 * HeapStats snapshots
@@ -101,7 +101,7 @@ $ java -jar hsloader.jar [options] file1 file2 ...
 
 ## サンプルダッシュボード
 
-ソースに含まれる ```kibana-dashboard.json``` を Kibana 5 にインポートすることで HSLoader のサンプルダッシュボードが利用可能です。
+ソースに含まれる ```kibana-dashboard.json``` を Kibana 5.4 にインポートすることで HSLoader のサンプルダッシュボードが利用可能です。
 その際、Kibana で以下のインデックスを定義するようにしてください。
 
 * HeapStats snapshots
