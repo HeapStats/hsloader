@@ -108,7 +108,7 @@ public class Option{
       System.out.println();
       System.out.println("Options:");
       System.out.println("  --help: This help.");
-      System.out.println("  --mode <snapshot>: Parser mode. (default: snapshot)");
+      System.out.println("  --mode <snapshot|log>: Parser mode. (default: snapshot)");
       System.out.println("  --host <hostname>: Hostname of Elasticsearch. (default: localhost)");
       System.out.println("  --port <num>: HTTP port of Elasticsearch. (default: 9200)");
       System.out.println("  --bulk <num>: Number of bulk requests to Elasticsearch. (default: 1000)");
