@@ -4,13 +4,6 @@ HSLoader is data loader for HeapStats snapshot and resource log to Elasticsearch
 This tool can be run for Elasticsearch 5.0 or later.
 
 
-## Library dependencies
-
-* heapstats-core.jar
-  * ```heapstats-core.jar``` in HeapStats Analyzer
-  * This repository contains this library.
-
-
 ## How to use
 
 ```
@@ -59,13 +52,6 @@ If you use this dashboard, you need to define indices as below:
 
 HSLoader は HeapStats のスナップショットとリソースログを Elasticsearch にロードするためのアプリケーションです。
 Elasticsearch 5.0 以降に対応しています。
-
-
-## 依存ライブラリ
-
-* heapstats-core.jar
-  * HeapStats Analyzer に同梱される ```heapstats-core.jar```
-  * 本リポジトリに HeapStats 2.0.4 の JAR を登録しています
 
 
 ## 使用方法
