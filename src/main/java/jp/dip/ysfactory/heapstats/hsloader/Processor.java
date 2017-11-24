@@ -18,24 +18,17 @@
  */
 package jp.dip.ysfactory.heapstats.hsloader;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
 import org.apache.http.HttpHost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.nio.entity.NStringEntity;
-import org.elasticsearch.client.Response;
+import org.elasticsearch.action.bulk.BulkProcessor;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.RestClient;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.io.UncheckedIOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.node.Node;
+import org.elasticsearch.threadpool.ThreadPool;
 
 /**
  * Abstract class for file processor.
@@ -44,44 +37,6 @@ import java.util.stream.Collectors;
  */
 public abstract class Processor implements AutoCloseable{
 
-    private static class IndexData{
-
-        private final String indexName;
-
-        private final String indexType;
-
-        private final String jsonData;
-
-        public IndexData(String indexName, String indexType, String jsonData) {
-            this.indexName = indexName;
-            this.indexType = indexType;
-            this.jsonData = jsonData;
-        }
-
-        @Override
-        public String toString() {
-            StringWriter writer = new StringWriter();
-
-            try(JsonGenerator jsonGen = (new JsonFactory()).createGenerator(writer)){
-                jsonGen.writeStartObject();
-                jsonGen.writeObjectFieldStart("index");
-                jsonGen.writeStringField("_index", indexName);
-                jsonGen.writeStringField("_type", indexType);
-                jsonGen.writeEndObject();
-                jsonGen.writeEndObject();
-            }
-            catch(IOException e){
-                throw new UncheckedIOException(e);
-            }
-
-            writer.append('\n');
-            writer.append(jsonData);
-
-            return writer.toString();
-        }
-
-    }
-    
     /**
      * Commandline option.
      */
@@ -90,12 +45,45 @@ public abstract class Processor implements AutoCloseable{
     /**
      * Elasticsearch REST client.
      */
-    protected final RestClient client;
+    protected final RestHighLevelClient client;
 
-    private final List<IndexData> indexDataList;
+    protected final BulkProcessor bulkProcessor;
 
     private boolean succeeded;
-    
+
+    private class BulkProcessorListener implements BulkProcessor.Listener{
+
+        private boolean succeeded;
+
+        public BulkProcessorListener(){
+            succeeded = true;
+        }
+
+        @Override
+        public void beforeBulk(long l, BulkRequest bulkRequest) {
+            // Do nothing
+        }
+
+        @Override
+        public void afterBulk(long l, BulkRequest bulkRequest, BulkResponse bulkResponse) {
+            // Do nothing
+        }
+
+        @Override
+        public void afterBulk(long l, BulkRequest bulkRequest, Throwable throwable) {
+            if(Boolean.getBoolean("debug")){
+                throwable.printStackTrace();
+            }
+            succeeded = false;
+        }
+
+        public boolean isSucceeded() {
+            return succeeded;
+        }
+    }
+
+    private final BulkProcessorListener bulkProcessorListener;
+
     /**
      * Constructor of Processor.
      * 
@@ -103,62 +91,25 @@ public abstract class Processor implements AutoCloseable{
      */
     public Processor(Option opt){
         this.opt = opt;
-        this.indexDataList = new ArrayList<>(opt.getBulkRequests());
         this.succeeded = true;
 
         int timeoutVal = opt.getTimeout() * 1000;
-        this.client = RestClient.builder(new HttpHost(opt.getHost(), opt.getPort(), "http"))
-                                  .setRequestConfigCallback(b -> b.setConnectTimeout(timeoutVal).setSocketTimeout(timeoutVal))
-                                  .setMaxRetryTimeoutMillis(timeoutVal)
-                                  .build();
+        this.client = new RestHighLevelClient(RestClient.builder(new HttpHost(opt.getHost(), opt.getPort(), "http"))
+                                                          .setRequestConfigCallback(b -> b.setConnectTimeout(timeoutVal).setSocketTimeout(timeoutVal))
+                                                          .setMaxRetryTimeoutMillis(timeoutVal));
+        this.bulkProcessorListener = new BulkProcessorListener();
+        this.bulkProcessor = (new BulkProcessor.Builder(client::bulkAsync, bulkProcessorListener, new ThreadPool(Settings.builder()
+                                                                                                                                 .put(Node.NODE_NAME_SETTING.getKey(), "high-level-client").build())))
+                                    .setBulkActions(opt.getBulkRequests())
+                                    .build();
     }
 
-    public synchronized void publish(){
-
-        if(indexDataList.isEmpty()){
-            return;
-        }
-
-        String putMessage = indexDataList.stream()
-                                           .map(IndexData::toString)
-                                           .collect(Collectors.joining("\n"));
-        indexDataList.clear();
-
-        try {
-            Response response = client.performRequest("PUT", "/_bulk", Collections.emptyMap(), new NStringEntity(putMessage, ContentType.create("application/x-ndjson")));
-
-            JsonFactory factory = new JsonFactory();
-            try (InputStream content = response.getEntity().getContent();
-                 JsonParser responseParser = factory.createParser(content);) {
-                while(responseParser.nextToken() != JsonToken.END_OBJECT){
-                    String objName = responseParser.getCurrentName();
-                    if((objName != null) && objName.equals("errors")){
-
-                        if(responseParser.getValueAsBoolean()){
-                            succeeded = false;
-                        }
-
-                        break;
-                    }
-                }
-            }
-
-        }
-        catch (IOException e){
-            throw new UncheckedIOException(e);
-        }
-
-    }
-
-    public synchronized void pushData(String indexName, String indexType, String jsonData){
-        indexDataList.add(new IndexData(indexName, indexType, jsonData));
-        if(indexDataList.size() == opt.getBulkRequests()){
-            publish();
-        }
+    public synchronized void publish(String index, String type, XContentBuilder contentBuilder){
+        bulkProcessor.add(new IndexRequest(index, type).source(contentBuilder));
     }
 
     public boolean isSucceeded() {
-        return succeeded;
+        return bulkProcessorListener.isSucceeded();
     }
 
     /**
@@ -168,11 +119,12 @@ public abstract class Processor implements AutoCloseable{
 
     @Override
     public void close() throws Exception {
-
-        if(!indexDataList.isEmpty()){
-            publish();
+        try{
+            bulkProcessor.close();
         }
-
+        catch(Exception e){
+            // Do nothing
+        }
         client.close();
     }
 }

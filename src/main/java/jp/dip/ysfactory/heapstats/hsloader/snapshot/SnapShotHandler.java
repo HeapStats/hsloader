@@ -20,16 +20,15 @@
  */
 package jp.dip.ysfactory.heapstats.hsloader.snapshot;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
 import jp.co.ntt.oss.heapstats.container.snapshot.ChildObjectData;
 import jp.co.ntt.oss.heapstats.container.snapshot.ObjectData;
 import jp.co.ntt.oss.heapstats.container.snapshot.SnapShotHeader;
 import jp.co.ntt.oss.heapstats.parser.SnapShotParserEventHandler;
 import jp.dip.ysfactory.heapstats.hsloader.Processor;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.UncheckedIOException;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -103,25 +102,25 @@ public class SnapShotHandler implements SnapShotParserEventHandler{
         indexNameSuffix = header.getSnapShotDate().format(indexSuffixFormatter);
         currentTimestamp = header.getSnapShotDate().atZone(zoneId).toInstant().toString();
 
-        StringWriter writer = new StringWriter();
-
-        try(JsonGenerator jsonGen = (new JsonFactory()).createGenerator(writer)){
-            jsonGen.writeStartObject();
-            jsonGen.writeStringField("@timestamp", currentTimestamp);
-            jsonGen.writeNumberField("numEntries", header.getNumEntries());
-            jsonGen.writeNumberField("numInstances", header.getNumInstances());
-            jsonGen.writeStringField("cause", header.getCauseString());
-            jsonGen.writeStringField("gcCause", header.getGcCause());
-            jsonGen.writeNumberField("fullCount", header.getFullCount());
-            jsonGen.writeNumberField("yngCount", header.getYngCount());
-            jsonGen.writeNumberField("gcTime", header.getGcTime());
-            jsonGen.writeNumberField("newHeap", header.getNewHeap());
-            jsonGen.writeNumberField("oldHeap", header.getOldHeap());
-            jsonGen.writeNumberField("totalCapacity", header.getTotalCapacity());
-            jsonGen.writeNumberField("metaspaceUsage", header.getMetaspaceUsage());
-            jsonGen.writeNumberField("metaspaceCapacity", header.getMetaspaceCapacity());
-            jsonGen.writeNumberField("safepointTime", header.getSafepointTime());
-            jsonGen.writeEndObject();
+        try{
+            XContentBuilder builder = XContentFactory.jsonBuilder()
+                                                     .startObject()
+                                                     .field("@timestamp", currentTimestamp)
+                                                     .field("numEntries", header.getNumEntries())
+                                                     .field("numInstances", header.getNumInstances())
+                                                     .field("cause", header.getCauseString())
+                                                     .field("gcCause", header.getGcCause())
+                                                     .field("fullCount", header.getFullCount())
+                                                     .field("yngCount", header.getYngCount())
+                                                     .field("gcTime", header.getGcTime())
+                                                     .field("newHeap", header.getNewHeap())
+                                                     .field("oldHeap", header.getOldHeap())
+                                                     .field("totalCapacity", header.getTotalCapacity())
+                                                     .field("metaspaceUsage", header.getMetaspaceUsage())
+                                                     .field("metaspaceCapacity", header.getMetaspaceCapacity())
+                                                     .field("safepointTime", header.getSafepointTime())
+                                                     .endObject();
+            processor.publish("heapstats-snapshot-summary-" + indexNameSuffix, "heapstats-snapshot-summary", builder);
         }
         catch(IOException e){
             System.err.println(e.getLocalizedMessage());
@@ -133,8 +132,6 @@ public class SnapShotHandler implements SnapShotParserEventHandler{
             return SnapShotParserEventHandler.ParseResult.HEAPSTATS_PARSE_ABORT;
         }
 
-        processor.pushData("heapstats-snapshot-summary-" + indexNameSuffix, "heapstats-snapshot-summary", writer.toString());
-        
         return SnapShotParserEventHandler.ParseResult.HEAPSTATS_PARSE_CONTINUE;
     }
 
@@ -144,18 +141,19 @@ public class SnapShotHandler implements SnapShotParserEventHandler{
     @Override
     public ParseResult onEntry(ObjectData data) {
         tagClassNameMap.put(data.getTag(), data.getName());
-        StringWriter writer = new StringWriter();
 
-        try(JsonGenerator jsonGen = (new JsonFactory()).createGenerator(writer)){
-            jsonGen.writeStartObject();
-            jsonGen.writeStringField("@timestamp", currentTimestamp);
-            jsonGen.writeNumberField("tag", data.getTag());
-            jsonGen.writeStringField("name", data.getName());
-            jsonGen.writeNumberField("classLoader", data.getClassLoader());
-            jsonGen.writeNumberField("classLoaderTag", data.getClassLoaderTag());
-            jsonGen.writeNumberField("count", data.getCount());
-            jsonGen.writeNumberField("totalSize", data.getTotalSize());
-            jsonGen.writeEndObject();
+        try{
+            XContentBuilder builder = XContentFactory.jsonBuilder()
+                                                     .startObject()
+                                                     .field("@timestamp", currentTimestamp)
+                                                     .field("tag", data.getTag())
+                                                     .field("name", data.getName())
+                                                     .field("classLoader", data.getClassLoader())
+                                                     .field("classLoaderTag", data.getClassLoaderTag())
+                                                     .field("count", data.getCount())
+                                                     .field("totalSize", data.getTotalSize())
+                                                     .endObject();
+            processor.publish("heapstats-snapshot-objects-" + indexNameSuffix, "heapstats-snapshot-objects", builder);
         }
         catch(IOException e){
             System.err.println(e.getLocalizedMessage());
@@ -166,8 +164,6 @@ public class SnapShotHandler implements SnapShotParserEventHandler{
             
             return SnapShotParserEventHandler.ParseResult.HEAPSTATS_PARSE_ABORT;
         }
-
-        processor.pushData("heapstats-snapshot-objects-" + indexNameSuffix, "heapstats-snapshot-objects", writer.toString());
 
         return SnapShotParserEventHandler.ParseResult.HEAPSTATS_PARSE_CONTINUE;
     }
@@ -182,24 +178,22 @@ public class SnapShotHandler implements SnapShotParserEventHandler{
     }
     
     private void putChildData(ChildObjectDataEx child){
-        StringWriter writer = new StringWriter();
-
-        try(JsonGenerator jsonGen = (new JsonFactory()).createGenerator(writer)){
-            jsonGen.writeStartObject();
-            jsonGen.writeStringField("@timestamp", currentTimestamp);
-            jsonGen.writeNumberField("parentTag", child.getParentClassTag());
-            jsonGen.writeStringField("parentName", tagClassNameMap.get(child.getParentClassTag()));
-            jsonGen.writeNumberField("tag", child.getTag());
-            jsonGen.writeStringField("name", tagClassNameMap.get(child.getTag()));
-            jsonGen.writeNumberField("instalces", child.getInstances());
-            jsonGen.writeNumberField("totalSize", child.getTotalSize());
-            jsonGen.writeEndObject();
+        try{
+            XContentBuilder builder = XContentFactory.jsonBuilder()
+                                                     .startObject()
+                                                     .field("@timestamp", currentTimestamp)
+                                                     .field("parentTag", child.getParentClassTag())
+                                                     .field("parentName", tagClassNameMap.get(child.getParentClassTag()))
+                                                     .field("tag", child.getTag())
+                                                     .field("name", tagClassNameMap.get(child.getTag()))
+                                                     .field("instalces", child.getInstances())
+                                                     .field("totalSize", child.getTotalSize())
+                                                     .endObject();
+            processor.publish("heapstats-snapshot-refs-" + indexNameSuffix, "heapstats-snapshot-refs", builder);
         }
         catch(IOException e){
             throw new UncheckedIOException(e);
         }
-
-        processor.pushData("heapstats-snapshot-refs-" + indexNameSuffix, "heapstats-snapshot-refs", writer.toString());
     }
 
     /**

@@ -87,7 +87,7 @@ $ java -jar hsloader.jar [options] file1 file2 ...
 
 ## サンプルダッシュボード
 
-ソースに含まれる ```kibana-dashboard.json``` を Kibana 5.4 にインポートすることで HSLoader のサンプルダッシュボードが利用可能です。
+ソースに含まれる ```kibana-dashboard.json``` を Kibana 5.4 以降にインポートすることで HSLoader のサンプルダッシュボードが利用可能です。
 その際、Kibana で以下のインデックスを定義するようにしてください。
 
 * HeapStats snapshots

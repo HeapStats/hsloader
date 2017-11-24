@@ -18,17 +18,16 @@
  */
 package jp.dip.ysfactory.heapstats.hsloader.log;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
 import jp.co.ntt.oss.heapstats.container.log.DiffData;
 import jp.co.ntt.oss.heapstats.container.log.LogData;
 import jp.co.ntt.oss.heapstats.task.ParseLogFile;
 import jp.dip.ysfactory.heapstats.hsloader.Option;
 import jp.dip.ysfactory.heapstats.hsloader.Processor;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.UncheckedIOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -65,80 +64,71 @@ public class LogProcessor extends Processor{
         super(opt);
     }
 
-    private void writeTag(JsonGenerator jsonGen, LocalDateTime dateTime) throws IOException {
+    private XContentBuilder writeTag(XContentBuilder builder, LocalDateTime dateTime) throws IOException {
         boolean isArchive = archivePoints.containsKey(dateTime);
         boolean isReboot = rebootSuspectList.contains(dateTime);
 
         if(isArchive || isReboot){
-            jsonGen.writeArrayFieldStart("tag");
-
+            builder.startArray("tag");
             if(isArchive){
-                jsonGen.writeString("archive");
+                builder.value("archive");
             }
             if(isReboot){
-                jsonGen.writeString("reboot");
+                builder.value("reboot");
             }
-
-            jsonGen.writeEndArray();
+            builder.endArray();
         }
         if(isArchive){
-            jsonGen.writeStringField("archivePath", archivePoints.get(dateTime));
+            builder.field("archivePath", archivePoints.get(dateTime));
         }
 
+        return builder;
     }
 
     private void storeLogData(LogData logData){
-        StringWriter writer = new StringWriter();
-
-        try(JsonGenerator jsonGen = (new JsonFactory()).createGenerator(writer)){
-            jsonGen.writeStartObject();
-            jsonGen.writeStringField("@timestamp", logData.getDateTime().atZone(opt.getZoneId()).toInstant().toString());
-            jsonGen.writeStringField("logCause", logData.getLogCause().toString());
-            jsonGen.writeNumberField("javaVSSize", logData.getJavaVSSize());
-            jsonGen.writeNumberField("javaRSSize", logData.getJavaRSSize());
-            jsonGen.writeNumberField("jvmLiveThreads", logData.getJvmLiveThreads());
-
-            writeTag(jsonGen, logData.getDateTime());
-
-            jsonGen.writeEndObject();
+        try{
+            XContentBuilder builder = XContentFactory.jsonBuilder()
+                                                     .startObject()
+                                                     .field("@timestamp", logData.getDateTime().atZone(opt.getZoneId()).toInstant().toString())
+                                                     .field("logCause", logData.getLogCause().toString())
+                                                     .field("javaVSSize", logData.getJavaVSSize())
+                                                     .field("javaRSSize", logData.getJavaRSSize())
+                                                     .field("jvmLiveThreads", logData.getJvmLiveThreads());
+            writeTag(builder, logData.getDateTime())
+                .endObject();
+            this.publish("heapstats-resource-log-" + logData.getDateTime().format(indexSuffixFormatter), "heapstats-resource-log", builder);
         }
         catch(IOException e){
             throw new UncheckedIOException(e);
         }
-
-        this.pushData("heapstats-resource-log-" + logData.getDateTime().format(indexSuffixFormatter), "heapstats-resource-log", writer.toString());
     }
     
     private void storeDiffData(DiffData diffData){
-        StringWriter writer = new StringWriter();
-
-        try(JsonGenerator jsonGen = (new JsonFactory()).createGenerator(writer)){
-            jsonGen.writeStartObject();
-            jsonGen.writeStringField("@timestamp", diffData.getDateTime().atZone(opt.getZoneId()).toInstant().toString());
-            jsonGen.writeNumberField("javaUserUsage", diffData.getJavaUserUsage());
-            jsonGen.writeNumberField("javaSysUsage", diffData.getJavaSysUsage());
-            jsonGen.writeNumberField("cpuUserUsage", diffData.getCpuUserUsage());
-            jsonGen.writeNumberField("cpuNiceUsage", diffData.getCpuNiceUsage());
-            jsonGen.writeNumberField("cpuSysUsage", diffData.getCpuSysUsage());
-            jsonGen.writeNumberField("cpuIdleUsage", diffData.getCpuIdleUsage());
-            jsonGen.writeNumberField("cpuIOWaitUsage", diffData.getCpuIOWaitUsage());
-            jsonGen.writeNumberField("cpuIRQUsage", diffData.getCpuIRQUsage());
-            jsonGen.writeNumberField("cpuSoftIRQUsage", diffData.getCpuSoftIRQUsage());
-            jsonGen.writeNumberField("cpuStealUsage", diffData.getCpuStealUsage());
-            jsonGen.writeNumberField("cpuGuestUsage", diffData.getCpuGuestUsage());
-            jsonGen.writeNumberField("jvmSyncPark", diffData.getJvmSyncPark());
-            jsonGen.writeNumberField("jvmSafepointTime", diffData.getJvmSafepointTime());
-            jsonGen.writeNumberField("jvmSafepoints", diffData.getJvmSafepoints());
-
-            writeTag(jsonGen, diffData.getDateTime());
-
-            jsonGen.writeEndObject();
+        try{
+            XContentBuilder builder = XContentFactory.jsonBuilder()
+                                                     .startObject()
+                                                     .field("@timestamp", diffData.getDateTime().atZone(opt.getZoneId()).toInstant().toString())
+                                                     .field("javaUserUsage", diffData.getJavaUserUsage())
+                                                     .field("javaSysUsage", diffData.getJavaSysUsage())
+                                                     .field("cpuUserUsage", diffData.getCpuUserUsage())
+                                                     .field("cpuNiceUsage", diffData.getCpuNiceUsage())
+                                                     .field("cpuSysUsage", diffData.getCpuSysUsage())
+                                                     .field("cpuIdleUsage", diffData.getCpuIdleUsage())
+                                                     .field("cpuIOWaitUsage", diffData.getCpuIOWaitUsage())
+                                                     .field("cpuIRQUsage", diffData.getCpuIRQUsage())
+                                                     .field("cpuSoftIRQUsage", diffData.getCpuSoftIRQUsage())
+                                                     .field("cpuStealUsage", diffData.getCpuStealUsage())
+                                                     .field("cpuGuestUsage", diffData.getCpuGuestUsage())
+                                                     .field("jvmSyncPark", diffData.getJvmSyncPark())
+                                                     .field("jvmSafepointTime", diffData.getJvmSafepointTime())
+                                                     .field("jvmSafepoints", diffData.getJvmSafepoints());
+            writeTag(builder, diffData.getDateTime())
+                .endObject();
+            this.publish("heapstats-resource-diff-" + diffData.getDateTime().format(indexSuffixFormatter), "heapstats-resource-diff", builder);
         }
         catch(IOException e){
             throw new UncheckedIOException(e);
         }
-
-        this.pushData("heapstats-resource-diff-" + diffData.getDateTime().format(indexSuffixFormatter), "heapstats-resource-diff", writer.toString());
     }
 
     /**
