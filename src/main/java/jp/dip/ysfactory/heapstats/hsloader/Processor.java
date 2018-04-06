@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2017 Yasumasa Suenaga
+ * Copyright (C) 2016-2018 Yasumasa Suenaga
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -25,10 +25,7 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.node.Node;
-import org.elasticsearch.threadpool.ThreadPool;
 
 /**
  * Abstract class for file processor.
@@ -98,10 +95,9 @@ public abstract class Processor implements AutoCloseable{
                                                           .setRequestConfigCallback(b -> b.setConnectTimeout(timeoutVal).setSocketTimeout(timeoutVal))
                                                           .setMaxRetryTimeoutMillis(timeoutVal));
         this.bulkProcessorListener = new BulkProcessorListener();
-        this.bulkProcessor = (new BulkProcessor.Builder(client::bulkAsync, bulkProcessorListener, new ThreadPool(Settings.builder()
-                                                                                                                                 .put(Node.NODE_NAME_SETTING.getKey(), "high-level-client").build())))
-                                    .setBulkActions(opt.getBulkRequests())
-                                    .build();
+        this.bulkProcessor = BulkProcessor.builder(client::bulkAsync, bulkProcessorListener)
+                                          .setBulkActions(opt.getBulkRequests())
+                                          .build();
     }
 
     public synchronized void publish(String index, String type, XContentBuilder contentBuilder){
