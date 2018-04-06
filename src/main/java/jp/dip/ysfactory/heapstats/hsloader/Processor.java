@@ -32,7 +32,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
  * 
  * @author Yasumasa Suenaga
  */
-public abstract class Processor implements AutoCloseable{
+public abstract class Processor implements AutoCloseable, BulkProcessor.Listener{
 
     /**
      * Commandline option.
@@ -48,39 +48,6 @@ public abstract class Processor implements AutoCloseable{
 
     private boolean succeeded;
 
-    private class BulkProcessorListener implements BulkProcessor.Listener{
-
-        private boolean succeeded;
-
-        public BulkProcessorListener(){
-            succeeded = true;
-        }
-
-        @Override
-        public void beforeBulk(long l, BulkRequest bulkRequest) {
-            // Do nothing
-        }
-
-        @Override
-        public void afterBulk(long l, BulkRequest bulkRequest, BulkResponse bulkResponse) {
-            // Do nothing
-        }
-
-        @Override
-        public void afterBulk(long l, BulkRequest bulkRequest, Throwable throwable) {
-            if(Boolean.getBoolean("debug")){
-                throwable.printStackTrace();
-            }
-            succeeded = false;
-        }
-
-        public boolean isSucceeded() {
-            return succeeded;
-        }
-    }
-
-    private final BulkProcessorListener bulkProcessorListener;
-
     /**
      * Constructor of Processor.
      * 
@@ -94,8 +61,7 @@ public abstract class Processor implements AutoCloseable{
         this.client = new RestHighLevelClient(RestClient.builder(new HttpHost(opt.getHost(), opt.getPort(), "http"))
                                                           .setRequestConfigCallback(b -> b.setConnectTimeout(timeoutVal).setSocketTimeout(timeoutVal))
                                                           .setMaxRetryTimeoutMillis(timeoutVal));
-        this.bulkProcessorListener = new BulkProcessorListener();
-        this.bulkProcessor = BulkProcessor.builder(client::bulkAsync, bulkProcessorListener)
+        this.bulkProcessor = BulkProcessor.builder(client::bulkAsync, this)
                                           .setBulkActions(opt.getBulkRequests())
                                           .build();
     }
@@ -105,7 +71,25 @@ public abstract class Processor implements AutoCloseable{
     }
 
     public boolean isSucceeded() {
-        return bulkProcessorListener.isSucceeded();
+        return succeeded;
+    }
+
+    @Override
+    public void beforeBulk(long l, BulkRequest bulkRequest) {
+        // Do nothing
+    }
+
+    @Override
+    public void afterBulk(long l, BulkRequest bulkRequest, BulkResponse bulkResponse) {
+        // Do nothing
+    }
+
+    @Override
+    public void afterBulk(long l, BulkRequest bulkRequest, Throwable throwable) {
+        if(Boolean.getBoolean("debug")){
+            throwable.printStackTrace();
+        }
+        succeeded = false;
     }
 
     /**
